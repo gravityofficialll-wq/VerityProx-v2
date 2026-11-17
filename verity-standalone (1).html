@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verity</title>
+<style>
+:root{--bg:#ffe45c;--fg:#2a2200;--mut:#6b5a10;--card:#fffbe0;--bd:#e0b800;--ac:#f5b800;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#ffe45c;--fg:#2a2200;--mut:#6b5a10;--card:#fffbe0;--bd:#e0b800;color-scheme:light}}
+:root[data-theme="dark"]{--bg:#ffe45c;--fg:#2a2200;--mut:#6b5a10;--card:#fffbe0;--bd:#e0b800;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:linear-gradient(to top,#000 0,rgba(0,0,0,.85) 10%,rgba(0,0,0,.4) 30%,rgba(0,0,0,0) 62%) fixed,linear-gradient(160deg,#fff08a,#ffdf3d 55%,#ffcf24) fixed;background-color:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+main{width:100%;max-width:620px;text-align:center;position:relative;z-index:1}
+body::before,body::after{content:"";position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(70px);opacity:.55}
+body::before{width:420px;height:420px;left:-100px;top:-80px;background:#fffbd0;animation:drift 14s ease-in-out infinite alternate}
+body::after{width:480px;height:480px;right:-140px;top:25%;background:#ffb703;animation:drift 18s ease-in-out infinite alternate-reverse}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.15)}}
+@media (prefers-reduced-motion:reduce){body::before,body::after{animation:none}}
+input[type=text]{box-shadow:0 4px 24px rgba(0,0,0,.25)}
+input[type=text]:focus{box-shadow:0 0 0 4px rgba(245,184,0,.45),0 0 34px rgba(255,190,0,.9)}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.sun{position:fixed;left:50%;bottom:30vh;width:min(620px,90vw);aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,#fffbd0 0,#ffe14d 28%,rgba(255,170,0,.55) 48%,rgba(255,150,0,0) 70%);z-index:0;pointer-events:none;animation:pulse 5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.75;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.08)}}
+.floor{position:fixed;left:0;right:0;bottom:0;height:40vh;overflow:hidden;z-index:0;pointer-events:none;perspective:240px;perspective-origin:50% 0;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 45%);mask-image:linear-gradient(to bottom,transparent,#000 45%)}
+.grid{position:absolute;left:-60%;width:220%;top:0;height:220%;transform-origin:50% 0;transform:rotateX(72deg);background-image:linear-gradient(rgba(255,214,0,.8) 2px,transparent 2px),linear-gradient(90deg,rgba(255,214,0,.8) 2px,transparent 2px);background-size:64px 64px;animation:grid 1.4s linear infinite;filter:drop-shadow(0 0 6px rgba(255,200,0,.9))}
+@keyframes grid{to{background-position:0 64px}}
+@media (prefers-reduced-motion:reduce){.grid,.sun{animation:none}}
+.logo{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:28px}
+.logo h1{font-size:56px;margin:0;letter-spacing:-2px}
+.ball{width:56px;height:56px;flex:none;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff6a8 0,#ffe14d 28%,#ffc400 62%,#e69500 100%);position:relative;box-shadow:inset -5px -7px 10px rgba(170,95,0,.35),inset 3px 3px 6px rgba(255,255,255,.5),0 6px 14px rgba(200,130,0,.35),0 0 0 2px rgba(190,115,0,.35);transform-origin:50% 100%;animation:bob 2.6s ease-in-out infinite}
+.ball::before{content:"";position:absolute;top:8%;left:16%;width:36%;height:22%;border-radius:50%;background:rgba(255,255,255,.6);transform:rotate(-32deg);filter:blur(1px)}
+.ball .eyes{position:absolute;inset:0;transform:translate(var(--x,0%),var(--y,0%));transition:transform .12s ease-out}
+.ball .e{position:absolute;top:35%;width:11%;height:18%;border-radius:50%;background:#3a2a00;left:30%;transform-origin:50% 50%;animation:blink 4.2s infinite}
+.ball .e.r{left:auto;right:30%}
+.ball .mo{position:absolute;left:26%;width:48%;top:55%;height:28%;padding:0;max-width:none;overflow:visible;transform-origin:50% 0;transition:transform .25s ease}
+.ball .mo path{fill:none;stroke:#3a2a00;stroke-width:3.4;stroke-linecap:round}
+#fab:hover .ball .mo,.think .ball .mo{transform:scale(1.15,1.3)}
+#fab:hover .ball{animation:wiggle .5s ease-in-out infinite}
+.think .ball{animation-duration:.7s}
+@keyframes bob{0%,100%{transform:translateY(0) scale(1.04,.96)}50%{transform:translateY(-9%) scale(.97,1.03)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes wiggle{0%,100%{transform:rotate(-8deg) scale(1.08)}50%{transform:rotate(8deg) scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.ball,#fab:hover .ball,.ball .e{animation:none}.ball .eyes{transition:none}}
+form{display:flex;gap:8px}
+input[type=text]{flex:1;min-width:0;padding:15px 20px;font-size:17px;border-radius:30px;border:2px solid var(--bd);background:var(--card);color:var(--fg);outline:none}
+input[type=text]:focus{border-color:var(--ac)}
+button.go{padding:0 24px;border:0;border-radius:30px;background:#2a2200;color:#ffe45c;font-weight:700;font-size:16px;cursor:pointer}
+p.hint{color:var(--mut);font-size:14px;margin-top:16px}
+#fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:64px;height:64px;border:0;padding:0;cursor:pointer;background:none}
+#fab .ball{width:64px;height:64px}
+#panel{position:fixed;right:20px;bottom:calc(96px + env(safe-area-inset-bottom,0px));width:min(360px,calc(100vw - 40px));height:min(460px,60vh);background:var(--card);border:1px solid var(--bd);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden;text-align:left}
+#panel.open{display:flex}
+#panel header{padding:12px 16px;font-weight:700;background:var(--ac);color:#2a2000;display:flex;align-items:center;gap:10px}
+#panel header .ball{width:24px;height:24px;box-shadow:none}
+#log{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.m{padding:9px 13px;border-radius:14px;max-width:85%;font-size:15px;line-height:1.4;white-space:pre-wrap}
+.u{align-self:flex-end;background:var(--ac);color:#2a2000}
+.a{align-self:flex-start;background:var(--bg);border:1px solid var(--bd)}
+#chat{display:flex;gap:6px;padding:10px;border-top:1px solid var(--bd)}
+#chat input{flex:1;min-width:0;padding:10px 14px;border-radius:20px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);font-size:15px}
+#chat button{border:0;border-radius:20px;background:var(--ac);padding:0 16px;font-weight:700;cursor:pointer;color:#2a2000}
+
+#gbtn{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:16px;z-index:3;padding:10px 18px;border:0;border-radius:24px;background:#2a2200;color:#ffe45c;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#gm{position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px}
+#gm.open{display:flex}
+#gc{background:var(--card);color:var(--fg);border-radius:20px;width:min(400px,100%);max-height:90vh;overflow:auto;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+#gh{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+#gh h2{flex:1;margin:0;font-size:20px}
+#gh button{border:0;border-radius:14px;background:var(--ac);color:#2a2200;font-weight:700;padding:6px 12px;cursor:pointer}
+.gi{display:block;width:100%;text-align:left;margin-bottom:10px;padding:12px 14px;border:2px solid var(--bd);border-radius:14px;background:var(--bg);color:var(--fg);cursor:pointer;font-size:14px}
+.gi b{display:block;font-size:17px;margin-bottom:2px}
+.gi:hover{border-color:var(--ac)}
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px;margin:10px auto}
+.tc{aspect-ratio:1;font-size:40px;font-weight:800;border:2px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--fg);cursor:pointer}
+.sc{display:block;margin:8px auto;border-radius:10px;max-width:100%}
+.dp{display:grid;grid-template-columns:repeat(3,48px);gap:6px;justify-content:center;margin-top:8px}
+.dp button{height:44px;border:0;border-radius:10px;background:var(--ac);font-size:18px;cursor:pointer}
+.cb{position:relative;height:280px;border-radius:12px;background:var(--bg);border:2px dashed var(--bd);overflow:hidden;margin-top:8px}
+.ginfo{text-align:center;margin:6px 0;font-weight:600}
+.gr{display:block;margin:6px auto;border:0;border-radius:14px;background:var(--ac);color:#2a2200;font-weight:700;padding:8px 16px;cursor:pointer}
+
+.pw{position:relative;text-align:center}
+.ball.pet{width:130px;height:130px;margin:8px auto;cursor:pointer}
+.pet.sad .mo{transform:scaleY(-1);transform-origin:50% 50%}
+.pet.sleep .e{animation:none;transform:scaleY(.12)}
+.pet.sleep{animation-duration:4.5s}
+.pet.jump{animation:wiggle .4s ease-in-out}
+.fl{position:absolute;left:50%;top:10px;font-size:30px;pointer-events:none;animation:fl 1s forwards}
+@keyframes fl{from{transform:translate(-50%,0);opacity:1}to{transform:translate(-50%,-60px);opacity:0}}
+.bub{min-height:40px;text-align:center;font-weight:600;margin:4px 0}
+.stats{display:grid;gap:6px;margin:8px 0}
+.st{display:flex;align-items:center;gap:8px;font-size:13px}
+.st span{width:56px}
+.bar{flex:1;height:10px;border-radius:6px;background:var(--bd);overflow:hidden}
+.bar i{display:block;height:100%;background:#f5b800;width:50%;transition:width .3s}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.acts button{border:0;border-radius:12px;background:var(--ac);color:#2a2200;font-weight:700;padding:8px 12px;cursor:pointer}
+.say{display:flex;gap:6px}
+.say input{flex:1;min-width:0;padding:8px 12px;border-radius:14px;border:2px solid var(--bd);background:var(--bg);color:var(--fg);font-size:15px}
+
+#res{margin-top:22px;text-align:left}
+.rn{display:inline-block;background:var(--card);color:var(--fg);border-radius:12px;padding:8px 14px;margin-bottom:12px;font-weight:600;font-size:14px}
+.rc{display:block;background:var(--card);color:var(--fg);border:2px solid var(--bd);border-radius:14px;padding:12px 16px;margin-bottom:10px;text-decoration:none;cursor:pointer}
+.rc:hover{border-color:var(--ac)}
+.rc b{display:block;font-size:17px}
+.rc small{display:block;color:var(--mut);margin:1px 0 4px}
+.rc span{font-size:14px}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas><div class="sun"></div><div class="floor"><div class="grid"></div></div>
+<main>
+  <div class="logo"><div class="ball"><i></i></div><h1>Verity</h1></div>
+  <form id="f">
+    <input type="text" id="q" placeholder="Search Verity or type a site address" autocomplete="off" autofocus>
+    <button class="go" type="submit">Search</button>
+  </form>
+  <p class="hint">Results and sites open right here in this tab.</p>
+  <div id="res"></div>
+</main>
+
+<button id="gbtn">🎮 Games</button>
+<div id="gm"><div id="gc"><div id="gh"><button id="gback" style="display:none">← Back</button><h2 id="gtitle">Games</h2><button id="gclose">✕</button></div><div id="gbody"></div></div></div>
+<div id="panel">
+  <header><div class="ball"><i></i></div>Verity Assistant</header>
+  <div id="log"><div class="m a">Hi, I’m Verity! Ask me anything.</div></div>
+  <form id="chat"><input type="text" id="cq" placeholder="Ask Verity…" autocomplete="off"><button type="submit">Send</button></form>
+</div>
+<button id="fab" aria-label="Open Verity assistant"><div class="ball"><i></i></div></button>
+
+<script>
+function openHere(url){
+  try{ window.top.location.href = url; }
+  catch(e){ window.location.href = url; }
+}
+function looksLikeSite(s){
+  if(/\s/.test(s)) return false;
+  return /^https?:\/\//i.test(s) || /^([a-z0-9-]+\.)+[a-z]{2,}(\/.*)?$/i.test(s);
+}
+var D = [
+["Wikipedia","https://www.wikipedia.org","Free online encyclopedia anyone can edit.","encyclopedia wiki facts reference history knowledge research"],
+["Britannica","https://www.britannica.com","Trusted encyclopedia articles on people, places and science.","encyclopedia facts reference history research homework"],
+["Khan Academy","https://www.khanacademy.org","Free lessons in math, science, history and more.","school learn math science homework lessons education"],
+["Merriam-Webster","https://www.merriam-webster.com","Dictionary, thesaurus and word games.","dictionary words definition thesaurus spelling"],
+["Dictionary.com","https://www.dictionary.com","Look up word meanings and synonyms.","dictionary words definition synonyms spelling"],
+["Wolfram Alpha","https://www.wolframalpha.com","Computational answers for math, science and data.","math calculator equations homework solve"],
+["NASA","https://www.nasa.gov","News, missions and images from space.","space planets rocket astronaut moon mars science"],
+["National Geographic","https://www.nationalgeographic.com","Animals, nature, science and exploration.","animals nature science photos geography travel"],
+["Smithsonian","https://www.si.edu","Museums, research and collections.","museum history science art culture"],
+["Coursera","https://www.coursera.org","Online courses from universities and companies.","courses learn college degree online class"],
+["Duolingo","https://www.duolingo.com","Learn languages with short daily lessons.","language spanish french learn lessons"],
+["Quizlet","https://quizlet.com","Flashcards and study tools.","study flashcards school test quiz learn"],
+["DeepL","https://www.deepl.com","Translate text between languages.","translate translator language"],
+["YouTube","https://www.youtube.com","Watch and share videos.","video videos watch music clips streaming"],
+["Twitch","https://www.twitch.tv","Live streams of games and creators.","live stream streaming games gaming videos"],
+["Netflix","https://www.netflix.com","Movies and TV shows.","movies tv shows watch streaming series"],
+["Spotify","https://www.spotify.com","Stream music and podcasts.","music songs podcasts streaming playlists"],
+["SoundCloud","https://soundcloud.com","Discover and share music.","music songs artists listen audio"],
+["IMDb","https://www.imdb.com","Movie, TV and celebrity information.","movies tv actors ratings reviews cast"],
+["Rotten Tomatoes","https://www.rottentomatoes.com","Movie and TV reviews and scores.","movies tv reviews ratings"],
+["Reddit","https://www.reddit.com","Communities and discussions on every topic.","forum community discussion memes social"],
+["Pinterest","https://www.pinterest.com","Find ideas and inspiration.","ideas pictures images crafts design inspiration"],
+["Imgur","https://imgur.com","Funny pictures and memes.","images memes pictures gifs funny"],
+["Giphy","https://giphy.com","Search and share animated GIFs.","gifs animated memes funny reactions"],
+["Discord","https://discord.com","Chat with friends and communities.","chat friends voice community messaging"],
+["BBC News","https://www.bbc.com/news","World news and analysis.","news world headlines current events"],
+["NPR","https://www.npr.org","News, podcasts and radio.","news radio podcasts stories"],
+["Reuters","https://www.reuters.com","Global news and business reporting.","news world business headlines"],
+["AP News","https://apnews.com","Breaking news from the Associated Press.","news breaking headlines world"],
+["The Guardian","https://www.theguardian.com","News, opinion and features.","news world opinion headlines"],
+["National Weather Service","https://www.weather.gov","Official US weather forecasts and alerts.","weather forecast storm rain snow temperature"],
+["ESPN","https://www.espn.com","Sports scores, news and highlights.","sports scores football basketball baseball soccer"],
+["NBA","https://www.nba.com","Basketball scores, news and stats.","basketball sports scores teams players"],
+["NFL","https://www.nfl.com","Football scores, news and schedules.","football sports scores teams players"],
+["Roblox","https://www.roblox.com","Play and create games with friends.","games gaming play avatar obby"],
+["Minecraft","https://www.minecraft.net","Build and explore in a blocky world.","games gaming build survival blocks"],
+["Fortnite","https://www.fortnite.com","Battle royale and creative games.","games gaming battle royale shooter"],
+["Steam","https://store.steampowered.com","Buy and play PC games.","games gaming pc store download"],
+["Epic Games Store","https://store.epicgames.com","PC games and free weekly titles.","games gaming pc store free"],
+["Poki","https://poki.com","Free online games in your browser.","games free play browser arcade fun"],
+["Coolmath Games","https://www.coolmathgames.com","Free brain-teasing browser games.","games free play puzzle math fun"],
+["Chess.com","https://www.chess.com","Play chess online and learn.","chess game play puzzles strategy"],
+["Lichess","https://lichess.org","Free, open-source chess.","chess game play free puzzles"],
+["Scratch","https://scratch.mit.edu","Create stories and games with blocks.","coding programming kids games create animation"],
+["itch.io","https://itch.io","Indie games to play and download.","games indie gaming download free"],
+["Nintendo","https://www.nintendo.com","Mario, Zelda and Switch games.","games gaming switch mario zelda pokemon"],
+["PlayStation","https://www.playstation.com","PlayStation games and consoles.","games gaming console playstation ps5"],
+["Xbox","https://www.xbox.com","Xbox games and consoles.","games gaming console xbox"],
+["Amazon","https://www.amazon.com","Shop for almost anything.","shopping buy store online products deals"],
+["eBay","https://www.ebay.com","Buy and sell new and used items.","shopping buy sell auction deals"],
+["Etsy","https://www.etsy.com","Handmade and vintage goods.","shopping handmade crafts gifts"],
+["Walmart","https://www.walmart.com","Groceries, electronics and more.","shopping store groceries deals"],
+["Target","https://www.target.com","Shop home, clothing and toys.","shopping store clothes toys deals"],
+["Best Buy","https://www.bestbuy.com","Electronics, computers and appliances.","shopping electronics computers phones tv"],
+["GitHub","https://github.com","Host and share code.","code programming developer repository open source"],
+["Stack Overflow","https://stackoverflow.com","Questions and answers for programmers.","code programming developer questions bugs help"],
+["MDN Web Docs","https://developer.mozilla.org","Documentation for HTML, CSS and JavaScript.","web html css javascript docs programming reference"],
+["Python","https://www.python.org","The Python programming language.","python code programming download docs"],
+["W3Schools","https://www.w3schools.com","Web development tutorials.","html css javascript tutorial learn coding web"],
+["freeCodeCamp","https://www.freecodecamp.org","Learn to code for free.","coding programming learn free tutorial developer"],
+["Code.org","https://code.org","Learn computer science.","coding programming kids learn computer science hour of code"],
+["Hacker News","https://news.ycombinator.com","Tech and startup news and discussion.","tech news startups programming"],
+["The Verge","https://www.theverge.com","Technology, science and culture news.","tech news gadgets phones reviews"],
+["Claude","https://claude.ai","Chat with Claude, an AI assistant.","ai assistant chatbot chat claude anthropic"],
+["Anthropic","https://www.anthropic.com","The AI safety company behind Claude.","ai research safety claude company"],
+["Canva","https://www.canva.com","Design posters, slides and graphics.","design graphics posters slides logo create"],
+["OpenStreetMap","https://www.openstreetmap.org","Free, editable map of the world.","maps directions places navigation"],
+["Tripadvisor","https://www.tripadvisor.com","Travel reviews, hotels and things to do.","travel hotels vacation flights restaurants reviews"],
+["Mayo Clinic","https://www.mayoclinic.org","Health information from doctors.","health medical doctor symptoms disease"],
+["CDC","https://www.cdc.gov","US public health information.","health disease vaccines safety medical"],
+["KidsHealth","https://kidshealth.org","Health information for kids and teens.","health kids teens medical body"],
+["Allrecipes","https://www.allrecipes.com","Recipes and cooking tips.","recipes cooking food dinner baking meals"],
+["Food Network","https://www.foodnetwork.com","Recipes and cooking shows.","recipes cooking food chef baking"],
+["Goodreads","https://www.goodreads.com","Find and review books.","books reading reviews authors novels"],
+["Project Gutenberg","https://www.gutenberg.org","Free classic books to read online.","books free ebooks classics reading literature"]
+];
+var STOP = ["the","a","an","of","and","to","for","in","is","on","best","free","online","how","what","with"];
+function hostOf(u){ return u.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]; }
+function showResults(q){
+  var box = document.getElementById("res"); if(!box) return;
+  var all = q.toLowerCase().split(/[^a-z0-9+#]+/).filter(Boolean);
+  var terms = all.filter(function(w){ return STOP.indexOf(w) < 0; }); if(!terms.length) terms = all;
+  var out = [];
+  D.forEach(function(d){
+    var t = d[0].toLowerCase(), tw = t.split(/[^a-z0-9]+/), tg = (d[3] + " " + hostOf(d[1])).toLowerCase().split(/[^a-z0-9]+/), ds = d[2].toLowerCase(), sc = 0;
+    terms.forEach(function(w){
+      if(tw.indexOf(w) > -1) sc += 6; else if(w.length > 2 && t.indexOf(w) > -1) sc += 4;
+      if(tg.indexOf(w) > -1) sc += 4; else if(w.length > 2 && tg.some(function(x){ return x.indexOf(w) === 0; })) sc += 2;
+      if(w.length > 2 && ds.indexOf(w) > -1) sc += 1;
+    });
+    if(sc > 0) out.push({d:d, s:sc});
+  });
+  out.sort(function(a,b){ return b.s - a.s; });
+  out = out.slice(0, 12);
+  box.innerHTML = "";
+  var n = document.createElement("div"); n.className = "rn";
+  n.textContent = out.length ? "Verity found " + out.length + " result" + (out.length > 1 ? "s" : "") + " for “" + q + "”" : "No results in Verity’s index for “" + q + "”. Try different words, or type a site address.";
+  box.appendChild(n);
+  out.forEach(function(r){
+    var a = document.createElement("a"); a.className = "rc"; a.href = r.d[1];
+    var h = document.createElement("b"); h.textContent = r.d[0];
+    var u = document.createElement("small"); u.textContent = hostOf(r.d[1]);
+    var p = document.createElement("span"); p.textContent = r.d[2];
+    a.appendChild(h); a.appendChild(u); a.appendChild(p);
+    a.addEventListener("click", function(ev){ ev.preventDefault(); openHere(r.d[1]); });
+    box.appendChild(a);
+  });
+}
+document.getElementById("f").addEventListener("submit", function(e){
+  e.preventDefault();
+  var q = document.getElementById("q").value.trim();
+  if(!q) return;
+  if(looksLikeSite(q)){
+    openHere(/^https?:\/\//i.test(q) ? q : "https://" + q);
+  } else {
+    showResults(q);
+  }
+});
+
+document.querySelectorAll(".ball").forEach(function(b){
+  b.innerHTML = '<span class="eyes"><b class="e"></b><b class="e r"></b></span><svg class="mo" viewBox="0 0 40 20"><path d="M5 4 Q20 22 35 4"/></svg>';
+});
+document.addEventListener("pointermove", function(ev){
+  document.querySelectorAll(".ball").forEach(function(b){
+    var r = b.getBoundingClientRect(), dx = ev.clientX - (r.left + r.width/2), dy = ev.clientY - (r.top + r.height/2);
+    var d = Math.sqrt(dx*dx + dy*dy) || 1, k = Math.min(d, 120)/120 * 7;
+    b.style.setProperty("--x", (dx/d*k) + "%");
+    b.style.setProperty("--y", (dy/d*k) + "%");
+  });
+});
+(function(){
+  var cv = document.getElementById("fx"), cx = cv.getContext("2d"), W, H, P = [], mx = -999, my = -999, i;
+  function rs(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+  rs(); addEventListener("resize", rs);
+  addEventListener("pointermove", function(e){ mx = e.clientX; my = e.clientY; });
+  for(i = 0; i < 90; i++) P.push({x:Math.random()*W, y:Math.random()*H, r:Math.random()*2.4+.8, v:Math.random()*.7+.25, a:Math.random()*6.28, c:Math.random() < .5 ? "255,255,255" : "255,190,0"});
+  function step(){
+    cx.clearRect(0, 0, W, H);
+    P.forEach(function(p){
+      p.y -= p.v; p.a += .012; p.x += Math.sin(p.a) * .4;
+      var dx = p.x - mx, dy = p.y - my, d = Math.sqrt(dx*dx + dy*dy);
+      if(d < 120 && d > 0){ p.x += dx/d * 2.2; p.y += dy/d * 2.2; }
+      if(p.y < -6){ p.y = H + 6; p.x = Math.random()*W; }
+      cx.shadowBlur = 14; cx.shadowColor = "rgba(" + p.c + ",.95)";
+      cx.fillStyle = "rgba(" + p.c + ",.9)";
+      cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.2832); cx.fill();
+    });
+    requestAnimationFrame(step);
+  }
+  if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches) step();
+})();
+(function(){
+  var gm = document.getElementById("gm"), body = document.getElementById("gbody"), title = document.getElementById("gtitle"), back = document.getElementById("gback"), stop = null;
+  function el(tag, cls, txt){ var x = document.createElement(tag); if(cls) x.className = cls; if(txt) x.textContent = txt; return x; }
+  function ttt(root){
+    var bd, over, L = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]], msg = el("p","ginfo"), grid = el("div","tg"), cells = [];
+    function win(p){ return L.some(function(l){ return l.every(function(i){ return bd[i] === p; }); }); }
+    function end(){ if(win("X")) msg.textContent = "You win! 🎉"; else if(win("O")) msg.textContent = "Computer wins."; else if(bd.every(Boolean)) msg.textContent = "It’s a draw."; else return false; over = true; return true; }
+    function find(p){ for(var k = 0; k < L.length; k++){ var v = L[k].map(function(i){ return bd[i]; }); if(v.filter(function(x){ return x === p; }).length === 2 && v.indexOf("") > -1) return L[k][v.indexOf("")]; } return -1; }
+    function ai(){ var m = find("O"); if(m < 0) m = find("X"); if(m < 0 && !bd[4]) m = 4; if(m < 0){ var e = []; bd.forEach(function(v,i){ if(!v) e.push(i); }); m = e[Math.floor(Math.random()*e.length)]; } bd[m] = "O"; }
+    function draw(){ cells.forEach(function(c,i){ c.textContent = bd[i]; }); }
+    function reset(){ bd = Array(9).fill(""); over = false; msg.textContent = "Your move. You are X."; draw(); }
+    for(var i = 0; i < 9; i++){ (function(i){ var c = el("button","tc"); c.onclick = function(){ if(over || bd[i]) return; bd[i] = "X"; if(!end()){ ai(); end(); } draw(); }; cells.push(c); grid.appendChild(c); })(i); }
+    var r = el("button","gr","Restart"); r.onclick = reset;
+    root.appendChild(msg); root.appendChild(grid); root.appendChild(r); reset();
+  }
+  function snake(root){
+    var N = 20, S = 15, cv = el("canvas","sc"), info = el("p","ginfo"), sn, dir, nd, food, score, dead, t, ctx;
+    cv.width = cv.height = 300; ctx = cv.getContext("2d");
+    function place(){ do { food = {x:Math.random()*N|0, y:Math.random()*N|0}; } while(sn.some(function(s){ return s.x === food.x && s.y === food.y; })); }
+    function reset(){ sn = [{x:10,y:10},{x:9,y:10},{x:8,y:10}]; dir = nd = {x:1,y:0}; score = 0; dead = false; place(); }
+    function draw(){ ctx.fillStyle = "#1a1500"; ctx.fillRect(0,0,300,300); ctx.fillStyle = "#ff5a3c"; ctx.fillRect(food.x*S+2, food.y*S+2, S-4, S-4); ctx.fillStyle = "#ffd21f"; sn.forEach(function(s){ ctx.fillRect(s.x*S+1, s.y*S+1, S-2, S-2); }); info.textContent = dead ? "Game over! Score " + score + ". Press a direction to restart." : "Score: " + score; }
+    function tick(){ if(dead) return; dir = nd; var h = {x:sn[0].x+dir.x, y:sn[0].y+dir.y}; if(h.x < 0 || h.y < 0 || h.x >= N || h.y >= N || sn.some(function(s){ return s.x === h.x && s.y === h.y; })){ dead = true; draw(); return; } sn.unshift(h); if(h.x === food.x && h.y === food.y){ score++; place(); } else sn.pop(); draw(); }
+    function turn(x,y){ if(dead){ reset(); draw(); } if(x === -dir.x && y === -dir.y) return; nd = {x:x, y:y}; }
+    var M = {ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],w:[0,-1],s:[0,1],a:[-1,0],d:[1,0]};
+    function key(e){ var m = M[e.key]; if(m){ e.preventDefault(); turn(m[0], m[1]); } }
+    var dp = el("div","dp"), btns = [["",null],["▲",[0,-1]],["",null],["◀",[-1,0]],["",null],["▶",[1,0]],["",null],["▼",[0,1]],["",null]];
+    btns.forEach(function(b){ if(!b[1]){ dp.appendChild(el("span")); return; } var x = el("button",null,b[0]); x.onclick = function(){ turn(b[1][0], b[1][1]); }; dp.appendChild(x); });
+    root.appendChild(info); root.appendChild(cv); root.appendChild(dp);
+    reset(); draw(); document.addEventListener("keydown", key); t = setInterval(tick, 120);
+    return function(){ clearInterval(t); document.removeEventListener("keydown", key); };
+  }
+  function catchGame(root){
+    var info = el("p","ginfo","Click the ball to start!"), box = el("div","cb"), b = el("div","ball"), score = 0, left = 20, t = null;
+    b.style.cssText = "position:absolute;width:48px;height:48px;cursor:pointer";
+    b.innerHTML = '<span class="eyes"><b class="e"></b><b class="e r"></b></span><svg class="mo" viewBox="0 0 40 20"><path d="M5 4 Q20 22 35 4"/></svg>';
+    root.appendChild(info); root.appendChild(box); box.appendChild(b);
+    function mv(){ b.style.left = Math.random()*(box.clientWidth-48) + "px"; b.style.top = Math.random()*(box.clientHeight-48) + "px"; }
+    function show(){ info.textContent = "Score: " + score + "   Time: " + left + "s"; }
+    mv();
+    b.onclick = function(){
+      if(left <= 0) return;
+      if(!t){ t = setInterval(function(){ left--; show(); if(left <= 0){ clearInterval(t); b.style.display = "none"; info.textContent = "Time’s up! You caught Verity " + score + " times. Press Back to play again."; } }, 1000); }
+      score++; show(); mv();
+    };
+    return function(){ if(t) clearInterval(t); };
+  }
+  function raise(root){
+    var KEY = "verityPet", S = {f:70, p:70, e:80, sl:false}, i;
+    try{
+      var sv = JSON.parse(localStorage.getItem(KEY));
+      if(sv && typeof sv.f === "number"){ var k = Math.min(200, Math.floor((Date.now() - sv.t) / 3000)); S = {f:Math.max(0, sv.f - k*.5), p:Math.max(0, sv.p - k*.6), e:Math.max(0, sv.e - k*.3), sl:false}; }
+    }catch(e){}
+    var wrap = el("div","pw"), pet = el("div","ball pet"), bub = el("p","bub","Hi! I’m Verity. Take care of me!"), stats = el("div","stats"), acts = el("div","acts"), sayRow = el("div","say"), bars = {};
+    pet.innerHTML = '<span class="eyes"><b class="e"></b><b class="e r"></b></span><svg class="mo" viewBox="0 0 40 20"><path d="M5 4 Q20 22 35 4"/></svg>';
+    wrap.appendChild(pet);
+    [["Food","f"],["Fun","p"],["Energy","e"]].forEach(function(r){ var row = el("div","st"), bar = el("div","bar"), fill = el("i"); bar.appendChild(fill); row.appendChild(el("span",null,r[0])); row.appendChild(bar); stats.appendChild(row); bars[r[1]] = fill; });
+    function save(){ try{ localStorage.setItem(KEY, JSON.stringify({f:S.f, p:S.p, e:S.e, t:Date.now()})); }catch(e){} }
+    function render(){
+      ["f","p","e"].forEach(function(k){ S[k] = Math.max(0, Math.min(100, S[k])); bars[k].style.width = S[k] + "%"; });
+      pet.classList.toggle("sleep", S.sl);
+      pet.classList.toggle("sad", !S.sl && (S.f < 25 || S.p < 25 || S.e < 15));
+    }
+    function say(t){ bub.textContent = t; }
+    function fl(em){ var x = el("span","fl",em); wrap.appendChild(x); setTimeout(function(){ x.remove(); }, 1000); }
+    function jump(){ pet.classList.add("jump"); setTimeout(function(){ pet.classList.remove("jump"); }, 400); }
+    function speak(t){ try{ if("speechSynthesis" in window){ speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(t); u.pitch = 2; u.rate = 1.15; speechSynthesis.speak(u); } }catch(e){} }
+    function act(label, fn){ var b = el("button",null,label); b.onclick = function(){ fn(); render(); save(); }; acts.appendChild(b); }
+    act("🍎 Feed", function(){ if(S.sl) return say("Shh, I’m sleeping… 😴"); if(S.f > 95) return say("I’m full! 😋"); S.f += 25; S.p += 2; fl("🍎"); say("Yum yum! 😋"); });
+    act("⚽ Play", function(){ if(S.sl) return say("Shh, I’m sleeping… 😴"); if(S.e < 10) return say("Too tired to play…"); S.p += 25; S.e -= 8; S.f -= 3; fl("⚽"); jump(); say("Wheee! ⚽"); });
+    act("😴 Sleep", function(){ S.sl = !S.sl; say(S.sl ? "Zzz… 😴" : "I’m awake!"); });
+    pet.onclick = function(){
+      if(S.sl){ S.sl = false; say("Hey! I was sleeping! 😠"); }
+      else { S.p += 3; jump(); fl("💛"); var r = ["Hehe!","That tickles!","Again!","I love you! 💛"]; say(r[Math.floor(Math.random()*r.length)]); }
+      render(); save();
+    };
+    var inp = el("input"); inp.type = "text"; inp.placeholder = "Say something and Verity repeats it…";
+    var go = el("button","gr","Say"); go.style.margin = "0";
+    function talk(){ var t = inp.value.trim(); if(!t) return; inp.value = ""; if(S.sl) return say("Shh, I’m sleeping… 😴"); say("“" + t + "”"); speak(t); jump(); }
+    go.onclick = talk; inp.addEventListener("keydown", function(e){ if(e.key === "Enter") talk(); });
+    sayRow.appendChild(inp); sayRow.appendChild(go);
+    root.appendChild(wrap); root.appendChild(bub); root.appendChild(stats); root.appendChild(acts); root.appendChild(sayRow);
+    render();
+    var tm = setInterval(function(){
+      if(S.sl){ S.e += 4; S.f -= .3; S.p -= .3; if(S.e >= 100){ S.sl = false; say("Good morning! 🌞"); } }
+      else { S.f -= 1; S.p -= 1.2; S.e -= .6;
+        if(S.f < 25) say("I’m hungry! 🍎"); else if(S.p < 25) say("I’m bored… play with me!"); else if(S.e < 15) say("So sleepy… 😴"); }
+      render(); save();
+    }, 3000);
+    return function(){ clearInterval(tm); save(); try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} };
+  }
+  var G = [{n:"Raise Verity", d:"Feed, play with and talk to your own Verity.", f:raise}, {n:"Tic-Tac-Toe", d:"You are X. Beat the computer.", f:ttt}, {n:"Snake", d:"Eat the dots and don’t crash. Arrow keys or WASD.", f:snake}, {n:"Catch Verity", d:"Click the ball as fast as you can for 20 seconds.", f:catchGame}, {n:"Roblox", d:"Opens roblox.com in this tab. You need a Roblox account to play.", url:"https://www.roblox.com"}];
+  function list(){
+    if(stop){ stop(); stop = null; }
+    title.textContent = "Games"; back.style.display = "none"; body.innerHTML = "";
+    G.forEach(function(g){ var b = el("button","gi"); b.appendChild(el("b",null,g.n)); b.appendChild(el("span",null,g.d)); b.onclick = function(){ if(g.url) openHere(g.url); else play(g); }; body.appendChild(b); });
+  }
+  function play(g){ body.innerHTML = ""; title.textContent = g.n; back.style.display = ""; stop = g.f(body) || null; }
+  function close(){ if(stop){ stop(); stop = null; } gm.classList.remove("open"); }
+  document.getElementById("gbtn").onclick = function(){ gm.classList.add("open"); list(); };
+  document.getElementById("gclose").onclick = close;
+  back.onclick = list;
+  gm.addEventListener("click", function(e){ if(e.target === gm) close(); });
+})();
+var panel = document.getElementById("panel"), log = document.getElementById("log");
+document.getElementById("fab").addEventListener("click", function(){ panel.classList.toggle("open"); });
+function add(cls, text){
+  var d = document.createElement("div");
+  d.className = "m " + cls; d.textContent = text;
+  log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+}
+var JOKES = ["Why did the search engine go to therapy? Too many unresolved queries.", "I told my computer I needed a break. Now it won’t stop sending me vacation ads.", "Why was the ball so happy? It always had a good bounce-back.", "Why do programmers prefer dark mode? Because light attracts bugs."];
+function localReply(t){
+  var s = t.toLowerCase().trim(), m;
+  if(/^(hi|hello|hey|yo|sup)\b/.test(s)) return "Hi there! I’m Verity. I can do math, tell the time or a joke, or help you search.";
+  if(/who are you|your name|what are you/.test(s)) return "I’m Verity, the little yellow ball that lives in this search engine.";
+  if(/\b(time|clock)\b/.test(s)) return "It’s " + new Date().toLocaleTimeString() + ".";
+  if(/\b(date|day is it|today)\b/.test(s)) return "Today is " + new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"}) + ".";
+  if(/joke/.test(s)) return JOKES[Math.floor(Math.random()*JOKES.length)];
+  if(/\b(thanks|thank you)\b/.test(s)) return "Anytime!";
+  m = s.replace(/^(what is|what’s|what's|calculate|calc)\s+/,"").replace(/\?$/,"").replace(/x/g,"*").replace(/\^/g,"**");
+  if(/^[\d\s+\-*/().%]+$/.test(m) && /\d/.test(m) && /[+\-*/%]/.test(m)){
+    try{ var v = Function("\"use strict\";return (" + m + ")")(); if(isFinite(v)) return t.trim() + " = " + v; }catch(e){}
+  }
+  if((m = s.match(/^(?:search(?: for)?|google|look up|find)\s+(.+)/))){ showResults(m[1]); return "Here’s what Verity found for " + m[1] + "."; }
+  if((m = s.match(/^(?:open|go to|visit)\s+(\S+)/))){ var u = m[1]; if(looksLikeSite(u)){ openHere(/^https?:\/\//i.test(u) ? u : "https://" + u); return "Opening " + u + "…"; } }
+  return null;
+}
+document.getElementById("chat").addEventListener("submit", function(e){
+  e.preventDefault();
+  var inp = document.getElementById("cq"), t = inp.value.trim();
+  if(!t) return;
+  inp.value = "";
+  add("u", t);
+  var r = localReply(t);
+  if(r){ add("a", r); return; }
+  var b = add("a", "I’m a simple helper, so I can’t answer that myself. ");
+  var a = document.createElement("a");
+  a.href = "#"; a.onclick = function(ev){ ev.preventDefault(); showResults(t); };
+  a.textContent = "Search Verity for it";
+  a.style.color = "inherit"; a.style.fontWeight = "700";
+  b.appendChild(a);
+  log.scrollTop = log.scrollHeight;
+});
+</script>
+</body>
+</html>
